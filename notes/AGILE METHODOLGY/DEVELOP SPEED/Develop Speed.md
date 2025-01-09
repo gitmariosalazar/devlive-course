@@ -1,0 +1,2 @@
+Development speed in Agile measures how much work can be completed in each sprint iteration.
+In addition, it is widely used as a calibration tool to help development teams create an accurate and efficient timeline.
