@@ -1,7 +1,7 @@
 import { products } from './products';
 
 class HashTable<K, V> {
-  private table: Map<K, V>;
+  table: Map<K, V>;
 
   constructor(initial?: [K, V][]) {
     this.table = new Map<K, V>(initial);
@@ -35,8 +35,8 @@ class HashTable<K, V> {
     this.table.clear();
   }
 
-  keys(): K[] {
-    return Array.from(this.table.keys());
+  keys() {
+    return this.table.keys();
   }
 
   values(): V[] {
@@ -49,6 +49,13 @@ class HashTable<K, V> {
 
   forEach(callback: (value: V, key: K) => void): void {
     this.table.forEach(callback);
+  }
+  update(key: K, item: V): boolean {
+    if (this.get(key)) {
+      this.table.set(key, item);
+      return true;
+    }
+    return false;
   }
 }
 
@@ -74,7 +81,20 @@ console.log(`Add products to Hash Table`);
 for (let product of productsList) {
   table.set(product.code, product);
 }
-
-console.log(table.get('PT008TECH'));
-console.log(table.has('PT008TECH'));
-console.log(table.has('PT008TEC'));
+console.log(`Product found\n`);
+const productFound: Product | undefined = table.get('PT008TECH');
+console.log(productFound);
+console.log(`\nProduct Update\n`);
+const pu: Product = {
+  code: 'PT008TECH10',
+  description: 'Portable solid-state drive Update',
+  iva: 12,
+  mark: 'SANDISK',
+  name: 'External SSD 1TB Update',
+  percentage_increment: 35,
+  public_price: 166.3,
+  quantity: 8,
+  supplier_price: 109.99
+};
+console.log(table.update(pu.code, pu));
+console.log(table.table.entries().next());
