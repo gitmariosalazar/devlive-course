@@ -79,7 +79,7 @@ export class DoublyNode<T> {
   }
 }
 
-export class DoublyLinkedList<T> {
+export class CircularDoublyLinkedList<T> {
   private head: DoublyNode<T> | null;
   private tail: DoublyNode<T> | null;
   private length: number;
@@ -94,15 +94,18 @@ export class DoublyLinkedList<T> {
     const newNode: DoublyNode<T> = new DoublyNode<T>(value);
     if (this.head === null) {
       this.head = newNode;
+      this.head.setPreviewNode(newNode);
+      this.head.setNextNode(newNode);
       this.tail = this.head;
       this.length++;
       return true;
     } else {
       if (this.tail !== null) {
-        const currentNode = this.tail;
         this.tail.setNextNode(newNode);
-        this.tail = this.tail.getNextNode();
-        this.tail?.setPreviewNode(currentNode);
+        newNode.setPreviewNode(this.tail);
+        newNode.setNextNode(this.head);
+        this.head.setPreviewNode(newNode);
+        this.tail = newNode;
         this.length++;
         return true;
       }
@@ -110,44 +113,45 @@ export class DoublyLinkedList<T> {
     return false;
   }
 
-  public find(searchValue: T): DoublyNode<T> | null {
-    let currentNode: DoublyNode<T> | null = this.head;
-    while (currentNode !== null) {
-      if (currentNode.getValue() === searchValue) {
-        return currentNode;
-      }
-      currentNode = currentNode.getNextNode();
-    }
-    return null;
-  }
-
   public remove(searchValue: T): boolean {
     if (this.head === null) return false;
-
-    if (this.head.getValue() === searchValue) {
-      const currentNode = this.head.getNextNode();
-      this.head = currentNode;
-      this.head?.setPreviewNode(null);
-      this.length--;
-      return true;
-    }
-
-    let currentNode: DoublyNode<T> | null = this.head;
-    while (currentNode !== null) {
-      if (currentNode.getNextNode()?.getValue() === searchValue) {
-        const toDeleteNode = currentNode.getNextNode();
-        currentNode.setNextNode(toDeleteNode?.getNextNode()!);
-        if (toDeleteNode?.getNextNode() !== null) {
-          toDeleteNode?.getNextNode()?.setPreviewNode(currentNode);
+    let currentNode = this.head;
+    do {
+      if (currentNode.getValue() === searchValue) {
+        if (this.head === this.tail) {
+          this.head = null;
+          this.tail = null;
         } else {
-          this.tail = currentNode;
+          const prevNode = currentNode.getPreviewNode();
+          const nextNode = currentNode.getNextNode();
+          prevNode?.setNextNode(nextNode);
+          nextNode?.setPreviewNode(prevNode);
+          if (currentNode === this.head) {
+            this.head = nextNode;
+          }
+          if (currentNode === this.tail) {
+            this.tail = prevNode;
+          }
         }
         this.length--;
         return true;
       }
-      currentNode = currentNode.getNextNode();
-    }
+      currentNode = currentNode.getNextNode()!;
+    } while (currentNode !== this.head);
+
     return false;
+  }
+
+  public find(searchValue: T): DoublyNode<T> | null {
+    let currentNode: DoublyNode<T> = this.head!;
+    if (this.head === null) return null;
+    do {
+      if (currentNode.getValue() === searchValue) {
+        return currentNode;
+      }
+      currentNode = currentNode.getNextNode()!;
+    } while (currentNode && currentNode !== this.head);
+    return null;
   }
 
   public update(searchValue: T, toUpdateValue: T): boolean {
@@ -165,11 +169,12 @@ export class DoublyLinkedList<T> {
 
   public toString(): string {
     let result: string = '';
-    let currentNode: DoublyNode<T> | null = this.head;
-    while (currentNode !== null) {
+    if (this.head === null) return (result += 'null');
+    let currentNode: DoublyNode<T> = this.head!;
+    do {
       result += currentNode.toString() + '\t\t';
-      currentNode = currentNode.getNextNode();
-    }
+      currentNode = currentNode.getNextNode()!;
+    } while (currentNode && currentNode !== this.head);
     return result;
   }
 
@@ -190,33 +195,34 @@ export class DoublyLinkedList<T> {
   }
 }
 
-const doubleLinkedList: DoublyLinkedList<string> =
-  new DoublyLinkedList<string>();
+const circularDoublyLinkedList: CircularDoublyLinkedList<string> =
+  new CircularDoublyLinkedList<string>();
 
-console.log(doubleLinkedList.add('A'));
-console.log(doubleLinkedList.add('B'));
-console.log(doubleLinkedList.add('C'));
-console.log(doubleLinkedList.add('D'));
-console.log(doubleLinkedList.add('E'));
+console.log(circularDoublyLinkedList.add('A'));
+console.log(circularDoublyLinkedList.add('B'));
+console.log(circularDoublyLinkedList.add('C'));
+console.log(circularDoublyLinkedList.add('D'));
+console.log(circularDoublyLinkedList.add('E'));
 
 /*
  */
 
-console.log(doubleLinkedList.getHead());
-console.log(doubleLinkedList.getTail());
-console.log(doubleLinkedList.size());
-console.log(doubleLinkedList.toString());
-//console.log(doubleLinkedList.find('G'));
-//console.log(doubleLinkedList.update('C', 'Updated value'));
-//console.log(doubleLinkedList.remove('A'));
-//console.log(doubleLinkedList.toString());
-console.log(doubleLinkedList.remove('C'));
-console.log(doubleLinkedList.toString());
-console.log(doubleLinkedList.remove('E'));
-console.log(doubleLinkedList.toString());
-//console.log(doubleLinkedList.remove('E'));
-//console.log(doubleLinkedList.toString());
-//console.log(doubleLinkedList.getHead());
-//console.log(doubleLinkedList.getTail());
-//console.log(doubleLinkedList.size());
-//console.log(doubleLinkedList.toString());
+console.log(circularDoublyLinkedList.getHead());
+console.log(circularDoublyLinkedList.getTail());
+console.log(circularDoublyLinkedList.size());
+console.log(circularDoublyLinkedList.toString());
+console.log(circularDoublyLinkedList.find('E')?.toString());
+console.log(circularDoublyLinkedList.update('C', 'Updated value'));
+console.log(circularDoublyLinkedList.remove('A'));
+console.log(circularDoublyLinkedList.toString());
+console.log(circularDoublyLinkedList.remove('B'));
+console.log(circularDoublyLinkedList.toString());
+console.log(circularDoublyLinkedList.remove('C'));
+console.log(circularDoublyLinkedList.toString());
+console.log(circularDoublyLinkedList.remove('D'));
+console.log(circularDoublyLinkedList.toString());
+console.log(circularDoublyLinkedList.remove('E'));
+console.log(circularDoublyLinkedList.toString());
+console.log(circularDoublyLinkedList.getHead());
+console.log(circularDoublyLinkedList.getTail());
+console.log(circularDoublyLinkedList.size());
